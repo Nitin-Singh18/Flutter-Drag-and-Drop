@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../common/constants.dart';
 import '../../models/item_model.dart';
 import '../../widgets/dragged_item_tile.dart';
 import '../../widgets/dragging_item_tile_widget.dart';
@@ -12,83 +13,116 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Color targetColor = Colors.grey;
-  List<ItemModel> droppedItems = [];
-  List<ItemModel> draggingItems = [
+  List<ItemModel> topItems = [];
+  List<ItemModel> bottomItems = [
     const ItemModel(name: "Item 1"),
     const ItemModel(name: "Item 2"),
     const ItemModel(name: "Item 3"),
     const ItemModel(name: "Item 4"),
   ];
 
-  void _addItem(ItemModel item) {
+  void _addTopItem(ItemModel item) {
     setState(() {
-      droppedItems.add(item);
-      draggingItems.remove(item);
+      topItems.add(item);
+    });
+  }
+
+  void _addBottomItem(ItemModel item) {
+    setState(() {
+      bottomItems.add(item);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Column(
         children: [
+          // Upper half
           Expanded(
             child: DragTarget<ItemModel>(
-              onAcceptWithDetails: (data) {
-                _addItem(data.data);
-              },
-              builder: (context, candidateData, rejectedData) {
-                return droppedItems.isEmpty
-                    ? const Center(
-                        child: Text("Drop an item!"),
-                      )
+              onAcceptWithDetails: (item) => _addTopItem(item.data),
+              builder: (BuildContext context, List<Object?> candidateData,
+                  List<dynamic> rejectedData) {
+                return topItems.isEmpty
+                    ? const Center(child: Text("Drop an item here!"))
                     : Padding(
-                        padding: const EdgeInsets.all(24.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 20, horizontal: 24),
                         child: ListView.builder(
-                            itemCount: droppedItems.length,
-                            itemBuilder: (context, index) {
-                              return Column(
-                                children: [
-                                  DraggedItemTile(
-                                      name: droppedItems[index].name),
-                                  const SizedBox(
-                                    height: 10,
+                          itemCount: topItems.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 4.0),
+                              child: Draggable<ItemModel>(
+                                data: topItems[index],
+                                feedback: Material(
+                                  borderRadius:
+                                      BorderRadius.circular(borderRadius),
+                                  child: SizedBox(
+                                    width: width,
+                                    child: DraggedItemTile(
+                                      name: topItems[index].name,
+                                    ),
                                   ),
-                                ],
-                              );
-                            }),
+                                ),
+                                childWhenDragging: const Opacity(
+                                  opacity: opacity,
+                                  child: DraggedItemTile(name: ""),
+                                ),
+                                child:
+                                    DraggedItemTile(name: topItems[index].name),
+                                onDragCompleted: () =>
+                                    topItems.remove(topItems[index]),
+                              ),
+                            );
+                          },
+                        ),
                       );
               },
             ),
           ),
+
+          // Lower half
           Expanded(
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+              padding: const EdgeInsets.symmetric(
+                vertical: screenVerticalPadding,
+                horizontal: screenHorizontalPadding,
+              ),
               color: Colors.blue[100],
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                alignment: WrapAlignment.start,
-                children: draggingItems
-                    .map(
-                      (item) => Draggable<ItemModel>(
-                        data: item,
-                        feedback: Material(
-                          borderRadius: BorderRadius.circular(12),
-                          child: DraggingItemTileWidget(name: item.name),
-                        ),
-                        childWhenDragging: const Opacity(
-                            opacity: 0.4,
-                            child: DraggingItemTileWidget(name: "")),
-                        child: DraggingItemTileWidget(name: item.name),
-                        onDragCompleted: () => setState(() {
-                          draggingItems.remove(item);
-                        }),
-                      ),
-                    )
-                    .toList(),
+              child: DragTarget<ItemModel>(
+                onAcceptWithDetails: (data) {
+                  _addBottomItem(data.data);
+                },
+                builder: (BuildContext context, List<Object?> candidateData,
+                    List<dynamic> rejectedData) {
+                  return Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.start,
+                    children: bottomItems
+                        .map(
+                          (item) => Draggable<ItemModel>(
+                            data: item,
+                            feedback: Material(
+                              borderRadius: BorderRadius.circular(borderRadius),
+                              child: DraggingItemTileWidget(name: item.name),
+                            ),
+                            childWhenDragging: const Opacity(
+                              opacity: opacity,
+                              child: DraggingItemTileWidget(name: ""),
+                            ),
+                            child: DraggingItemTileWidget(name: item.name),
+                            onDragCompleted: () => bottomItems.remove(item),
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
               ),
             ),
           ),

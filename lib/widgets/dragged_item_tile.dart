@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../common/constants.dart';
+
 class DraggedItemTile extends StatelessWidget {
   final String name;
 
@@ -8,12 +10,11 @@ class DraggedItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 52,
-      width: double.infinity,
+      height: 52.0,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         border: Border.all(),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: Text(
         name,

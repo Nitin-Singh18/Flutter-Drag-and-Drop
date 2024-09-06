@@ -13,9 +13,10 @@ class DraggingItemTileWidget extends StatelessWidget {
         vertical: 10,
       ),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.blue,
-          border: Border.all()),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.blue,
+        border: Border.all(),
+      ),
       child: Center(
         child: Text(name),
       ),
